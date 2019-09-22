@@ -47,7 +47,7 @@ namespace ExampleBot
         {
             _client.MessageReceived += HandleCommandAsync; // Messagerecieved
 
-            await _commands.AddModulesAsync(Assembly.GetEntryAssembly()); // Add module to _commands
+            await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), null); // Add module to _commands
         }
 
         private Task Log(LogMessage arg) // Logging
