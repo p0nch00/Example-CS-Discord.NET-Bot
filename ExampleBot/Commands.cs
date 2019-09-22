@@ -15,7 +15,7 @@ namespace ExampleBot
             eb.WithCurrentTimestamp(); // Adds the current timestamp to the footer
             eb.WithDescription("Pong! " + Program._client.Latency); // Adds a description to the embed to say Pong! and then put the latency
 
-            await ReplyAsync("", false, eb);// Responds with the embed
+            await ReplyAsync("", false, eb.Build());// Responds with the embed
         }
     }
 }
