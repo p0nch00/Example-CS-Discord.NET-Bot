@@ -2,7 +2,9 @@
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json;
 using System;
+using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 
@@ -17,6 +19,8 @@ namespace ExampleBot
         private CommandService _commands;
         private IServiceProvider _services;
 
+        private BotConfig config;
+
         // Runbot task
         public async Task RunBot()
         {
@@ -28,7 +32,23 @@ namespace ExampleBot
                 .AddSingleton(_commands)
                 .BuildServiceProvider();
 
-            string botToken = "TOKENGOESHERE"; // Make a string for the token
+            // If there isn't a bot config, create one
+            if (!File.Exists("config.json"))
+            {
+                config = new BotConfig()
+                {
+                    prefix = "!",
+                    token = "",
+                    game = ""
+                };
+                File.WriteAllText("config.json", JsonConvert.SerializeObject(config, Formatting.Indented));
+            }
+            else
+            {
+                config = JsonConvert.DeserializeObject<BotConfig>(File.ReadAllText("config.json"));
+            }
+
+            string botToken = config.token; // Make a string for the token
 
             _client.Log += Log; // Logging
 
@@ -38,7 +58,7 @@ namespace ExampleBot
 
             await _client.StartAsync(); // Start the bot user
 
-            await _client.SetGameAsync("GAMENAME"); // Set the game the bot is playing
+            await _client.SetGameAsync(config.game); // Set the game the bot is playing
 
             await Task.Delay(-1); // Delay for -1 to keep the console window opened
         }
@@ -62,7 +82,7 @@ namespace ExampleBot
             var message = arg as SocketUserMessage; // Create a variable with the message as SocketUserMessage
             if (message is null || message.Author.IsBot) return; // Checks if the message is empty or sent by a bot
             int argumentPos = 0; // Sets the argpos to 0 (the start of the message)
-            if (message.HasStringPrefix("PREFIXGOESHERE", ref argumentPos) || message.HasMentionPrefix(_client.CurrentUser, ref argumentPos)) // If the message has the prefix at the start or starts with someone mentioning the bot
+            if (message.HasStringPrefix(config.prefix, ref argumentPos) || message.HasMentionPrefix(_client.CurrentUser, ref argumentPos)) // If the message has the prefix at the start or starts with someone mentioning the bot
             {
                 var context = new SocketCommandContext(_client, message); // Create a variable called context
                 var result = await _commands.ExecuteAsync(context, argumentPos, _services); // Create a veriable called result
@@ -73,5 +93,12 @@ namespace ExampleBot
                 }
             }
         }
+    }
+
+    class BotConfig
+    {
+        public string token { get; set; }
+        public string prefix { get; set; }
+        public string game { get; set; }
     }
 }
