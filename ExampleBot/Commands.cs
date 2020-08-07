@@ -10,6 +10,11 @@ namespace ExampleBot
         private async Task Ping()
         {
             await ReplyAsync("Pong! 🏓 **" + Program._client.Latency + "ms**");
+        },
+        [Command("pong")]
+        private async Task Ping()
+        {
+            await ReplyAsync("Ping! 🏓 **" + Program._client.Latency + "ms**");
         }
     }
 }
